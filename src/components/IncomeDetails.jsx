@@ -4,40 +4,40 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
   const [newItemType, setNewItemType] = useState('earning');
   const [newItemName, setNewItemName] = useState('');
   const [newItemAmount, setNewItemAmount] = useState('');
-  
+
   // References to track cursor positions
   const earningInputRefs = useRef({});
   const deductionInputRefs = useRef({});
   const newItemAmountRef = useRef(null);
-  
+
   const addNewItem = () => {
     // Validate input
     if (!newItemName.trim()) {
       alert('Please enter a valid name');
       return;
     }
-    
+
     if (!newItemAmount.trim() || isNaN(parseFloat(newItemAmount))) {
       alert('Please enter a valid amount');
       return;
     }
-    
+
     const newItem = {
       name: newItemName.trim(),
       amount: newItemAmount.trim() // Store as entered, will format on display
     };
-    
+
     if (newItemType === 'earning') {
       setEarnings([...earnings, newItem]);
     } else {
       setDeductions([...deductions, newItem]);
     }
-    
+
     // Reset form
     setNewItemName('');
     setNewItemAmount('');
   };
-  
+
   const removeItem = (type, index) => {
     if (type === 'earning') {
       setEarnings(earnings.filter((_, i) => i !== index));
@@ -45,28 +45,28 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
       setDeductions(deductions.filter((_, i) => i !== index));
     }
   };
-  
+
   // Improved updateItem function to maintain cursor position
   const updateItem = (type, index, field, value) => {
     // For amount fields, we'll store the raw input value without immediate formatting
     // This prevents cursor jumping while typing
     if (type === 'earning') {
       const updatedEarnings = [...earnings];
-      
+
       // If this is an amount field, save the cursor position before update
       let cursorPosition = null;
       if (field === 'amount' && earningInputRefs.current[index]) {
         cursorPosition = earningInputRefs.current[index].selectionStart;
       }
-      
+
       // Update the value without immediate formatting
       updatedEarnings[index] = {
         ...updatedEarnings[index],
         [field]: value
       };
-      
+
       setEarnings(updatedEarnings);
-      
+
       // Restore cursor position after update
       if (cursorPosition !== null && earningInputRefs.current[index]) {
         setTimeout(() => {
@@ -76,21 +76,21 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
       }
     } else {
       const updatedDeductions = [...deductions];
-      
+
       // If this is an amount field, save the cursor position before update
       let cursorPosition = null;
       if (field === 'amount' && deductionInputRefs.current[index]) {
         cursorPosition = deductionInputRefs.current[index].selectionStart;
       }
-      
+
       // Update the value without immediate formatting
       updatedDeductions[index] = {
         ...updatedDeductions[index],
         [field]: value
       };
-      
+
       setDeductions(updatedDeductions);
-      
+
       // Restore cursor position after update
       if (cursorPosition !== null && deductionInputRefs.current[index]) {
         setTimeout(() => {
@@ -100,13 +100,13 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
       }
     }
   };
-  
+
   // Format amount for display, but maintain original value for editing
   const formatAmount = (amount) => {
     if (!amount || isNaN(parseFloat(amount))) return '';
     return parseFloat(amount).toFixed(2);
   };
-  
+
   // Format amount input on blur
   const handleNewItemAmountBlur = () => {
     if (newItemAmount && !isNaN(parseFloat(newItemAmount))) {
@@ -114,14 +114,14 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
       setNewItemAmount(formattedValue);
     }
   };
-  
+
   // Handle amount input change with cursor position preservation
   const handleNewItemAmountChange = (e) => {
     const value = e.target.value;
     const cursorPosition = e.target.selectionStart;
-    
+
     setNewItemAmount(value);
-    
+
     // Restore cursor position after update
     if (newItemAmountRef.current) {
       setTimeout(() => {
@@ -130,11 +130,11 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
       }, 0);
     }
   };
-  
+
   const grossEarnings = earnings.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
   const totalDeductions = deductions.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
   const netPayable = grossEarnings - totalDeductions;
-  
+
   return (
     <div className="card">
       <div className="flex items-center mb-5">
@@ -145,7 +145,7 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
         </span>
         <h2 className="text-xl font-semibold text-gray-800">Pay & Deduction Details</h2>
       </div>
-      
+
       {/* Add new item form with better layout */}
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <h3 className="text-gray-700 font-medium mb-3">Add New Item</h3>
@@ -191,7 +191,7 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
           </div>
         </div>
       </div>
-      
+
       {/* Earnings Section */}
       <div className="mb-6">
         <div className="flex items-center mb-3">
@@ -199,7 +199,7 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
           <div className="flex-grow mx-3 h-px bg-gray-200"></div>
           <span className="text-sm text-gray-500 whitespace-nowrap">Total: ₹{grossEarnings.toFixed(2)}</span>
         </div>
-        
+
         <div className="space-y-3">
           {earnings.length === 0 ? (
             <p className="text-gray-500 text-sm italic">No earnings added yet. Add your first earning above.</p>
@@ -248,7 +248,7 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
           )}
         </div>
       </div>
-      
+
       {/* Deductions Section */}
       <div className="mb-6">
         <div className="flex items-center mb-3">
@@ -256,7 +256,7 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
           <div className="flex-grow mx-3 h-px bg-gray-200"></div>
           <span className="text-sm text-gray-500 whitespace-nowrap">Total: ₹{totalDeductions.toFixed(2)}</span>
         </div>
-        
+
         <div className="space-y-3">
           {deductions.length === 0 ? (
             <p className="text-gray-500 text-sm italic">No deductions added yet. Add your first deduction above.</p>
@@ -305,7 +305,7 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
           )}
         </div>
       </div>
-      
+
       {/* Net Pay Summary Card */}
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
         <div className="grid grid-cols-3 gap-4">
@@ -328,4 +328,3 @@ const IncomeDetails = ({ earnings, setEarnings, deductions, setDeductions }) => 
 };
 
 export default IncomeDetails;
- 

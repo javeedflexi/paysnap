@@ -4,6 +4,7 @@ import EmployeePaySummary from './EmployeePaySummary';
 import IncomeDetails from './IncomeDetails';
 import PaySlipResult from './PaySlipResult';
 import ExcelUploader from './ExcelUploader';
+import Footer from './Footer';
 
 const PayslipGenerator = () => {
   const [companyInfo, setCompanyInfo] = useState({
@@ -230,6 +231,10 @@ const PayslipGenerator = () => {
             handleReset={handleReset}
             companyLogo={logoUrl}
           />
+
+          <div>
+            <Footer />
+          </div>
         </div>
       </div>
     </div>
@@ -237,4 +242,3 @@ const PayslipGenerator = () => {
 };
 
 export default PayslipGenerator;
- 

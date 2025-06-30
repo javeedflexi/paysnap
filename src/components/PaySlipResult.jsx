@@ -38,7 +38,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
       accent: [230, 230, 230] // Light gray
     }
   };
-  
+
   const [selectedTheme, setSelectedTheme] = useState('classic');
 
   // Create a reusable function for formatting currency consistently throughout the app
@@ -56,47 +56,47 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
   // Function to convert number to words (simple implementation)
   const numberToWords = (amount) => {
     if (amount === 0) return "Zero Rupees";
-    
+
     const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
     const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    
+
     const numToWord = (num) => {
       if (num < 20) return ones[num];
       const ten = Math.floor(num / 10);
       const one = num % 10;
       return tens[ten] + (one ? '-' + ones[one] : '');
     };
-    
+
     const decimal = Math.round((amount - Math.floor(amount)) * 100);
     let result = '';
-    
+
     const thousands = Math.floor(amount / 1000);
     if (thousands > 0) {
       result += numToWord(thousands) + ' Thousand ';
       amount %= 1000;
     }
-    
+
     const hundreds = Math.floor(amount / 100);
     if (hundreds > 0) {
       result += ones[hundreds] + ' Hundred ';
       amount %= 100;
     }
-    
+
     if (amount > 0) {
       if (result !== '') result += 'and ';
       result += numToWord(amount);
     }
-    
+
     return result + ' Rupees' + (decimal > 0 ? ' and ' + decimal + ' Paise' : '');
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { 
-      day: '2-digit', 
-      month: 'long', 
-      year: 'numeric' 
+    return date.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric'
     });
   };
 
@@ -110,12 +110,12 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
   const generatePDF = () => {
     try {
       const doc = new jsPDF();
-      
+
       // Add font that supports Unicode characters like the rupee symbol
       // Use standard fonts with encoding that better supports special characters
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      
+
       // Format currency function to ensure consistent formatting with rupee symbol
       const formatCurrency = (amount) => {
         // Format with thousand separators
@@ -126,43 +126,43 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         // Use "Rs." text instead of symbol to avoid rendering issues
         return `Rs. ${formattedAmount}`;
       };
-      
+
       // Get current theme colors from the selected theme
       const theme = themes[selectedTheme];
       const primaryColor = theme.primary;
       const secondaryColor = theme.secondary;
       const accentColor = theme.accent;
-      
+
       // Set common variables for layout consistency
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height; // A4 height
       const leftMargin = 14;
       const rightMargin = pageWidth - 14;
       const contentWidth = rightMargin - leftMargin;
-      
+
       // Keep track of current vertical position
       let currentY = 0;
-      
+
       // Compact layout with minimal spacing to fit on one page
-      
+
       // Header line at the top
       doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setLineWidth(0.5);
       doc.line(leftMargin, 8, rightMargin, 8);
-      
+
       // Add header information with compact spacing
       currentY = 20; // Start position for header
       doc.setFontSize(18); // Reduced from 22
       doc.setFont("helvetica", "bold");
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text("PAYSLIP", pageWidth/2, currentY, { align: "center" });
-      
+      doc.text("PAYSLIP", pageWidth / 2, currentY, { align: "center" });
+
       // Add thin line under header
       currentY += 4; // Reduced spacing
       doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setLineWidth(0.5);
       doc.line(leftMargin + 30, currentY, rightMargin - 30, currentY);
-      
+
       // Company information with compact spacing
       currentY += 8; // Reduced spacing
       const companyStartY = currentY;
@@ -172,7 +172,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
       doc.text(companyInfo.companyName || "Company Name", leftMargin, companyStartY);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9); // Reduced from 10
-      
+
       // Company address with compact wrapping
       currentY = companyStartY + 5; // Reduced spacing
       if (companyInfo.companyAddress) {
@@ -180,18 +180,18 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         doc.text(addressLines, leftMargin, currentY);
         currentY += addressLines.length * 4; // Reduced line height
       }
-      
+
       const cityPincodeCountry = [
-        companyInfo.city, 
-        companyInfo.pincode, 
+        companyInfo.city,
+        companyInfo.pincode,
         companyInfo.country
       ].filter(Boolean).join(", ");
-      
+
       if (cityPincodeCountry) {
         doc.text(cityPincodeCountry, leftMargin, currentY);
         currentY += 4; // Reduced spacing
       }
-      
+
       // Add logo if available
       if (companyLogo) {
         try {
@@ -201,31 +201,31 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
           console.error('Error adding logo to PDF:', err);
         }
       }
-      
+
       // Add a decorative section separator
       currentY += 5; // Reduced spacing
       const mainContentStartY = currentY;
       doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setLineWidth(0.5); // Reduced from 0.7
       doc.line(leftMargin, mainContentStartY, rightMargin, mainContentStartY);
-      
+
       // Update current position for Employee Information section with minimal spacing
       currentY = mainContentStartY + 6; // Reduced spacing
-      
+
       // Employee Information section heading
       doc.setFontSize(11); // Reduced from 12
       doc.setFont("helvetica", "bold");
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.text("Employee Information", leftMargin, currentY);
-      
+
       // Space between heading and employee table - INCREASED to prevent overlap
       currentY += 10; // Increased from 6 to ensure heading doesn't overlap with table
-      
+
       // Add a thin separator line under the heading
       doc.setDrawColor(220, 220, 220);
       doc.setLineWidth(0.2);
       doc.line(leftMargin, currentY - 4, leftMargin + 60, currentY - 4);
-      
+
       try {
         // Draw employee information table with compact styling
         const employeeTable = autoTable(doc, {
@@ -265,7 +265,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
               const y = data.cell.y;
               const w = data.cell.width;
               const h = data.cell.height;
-              
+
               doc.setDrawColor(220, 220, 220); // Light gray
               doc.setLineWidth(0.1);
               // Draw cell border
@@ -277,7 +277,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
           },
           margin: { top: 0, right: 0, bottom: 0, left: 0 } // Remove default margins
         });
-        
+
         // Update current position after employee table
         if (employeeTable && employeeTable.lastAutoTable) {
           currentY = employeeTable.lastAutoTable.finalY;
@@ -288,30 +288,30 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         console.error("Error rendering employee table:", e);
         currentY += 40; // Fallback position if table fails
       }
-      
+
       // Earnings section with minimal spacing
       currentY += 12; // Increased from 8 to give more space between tables
-      
+
       // Earnings section heading with clear separation
       doc.setFontSize(11); // Reduced from 12
       doc.setFont("helvetica", "bold");
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.text("", leftMargin, currentY);
-      
+
       // Clear space between earnings heading and table - INCREASED to prevent overlap
       currentY += 10; // Increased from 8 to ensure heading doesn't overlap with table
-      
+
       // Add a thin separator line under the heading
       doc.setDrawColor(220, 220, 220);
       doc.setLineWidth(0.2);
       doc.line(leftMargin, currentY - 4, leftMargin + 30, currentY - 4);
-      
+
       // Prepare earnings table data
       const earningsTableData = earnings.map(item => [
-        item.name, 
+        item.name,
         formatCurrency(item.amount)
       ]);
-      
+
       try {
         // Draw earnings table with compact styling
         const earningsTable = autoTable(doc, {
@@ -342,7 +342,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
           },
           margin: { top: 0, right: 0, bottom: 0, left: 0 } // Remove default margins
         });
-        
+
         if (earningsTable && earningsTable.lastAutoTable) {
           currentY = earningsTable.lastAutoTable.finalY;
         } else {
@@ -352,30 +352,30 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         console.error("Error rendering earnings table:", e);
         currentY += 15 + (earningsTableData.length * 8);
       }
-      
+
       // Deductions section with minimal spacing
       currentY += 12; // Increased from 8 to give more space between tables
-      
+
       // Deductions section heading with clear separation
       doc.setFontSize(11); // Reduced from 12
       doc.setFont("helvetica", "bold");
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.text("", leftMargin, currentY);
-      
+
       // Clear space between deductions heading and table - INCREASED to prevent overlap
       currentY += 10; // Increased from 8 to ensure heading doesn't overlap with table
-      
+
       // Add a thin separator line under the heading
       doc.setDrawColor(220, 220, 220);
       doc.setLineWidth(0.2);
       doc.line(leftMargin, currentY - 4, leftMargin + 35, currentY - 4);
-      
+
       // Prepare deductions table data
       const deductionsTableData = deductions.map(item => [
-        item.name, 
+        item.name,
         formatCurrency(item.amount)
       ]);
-      
+
       try {
         // Draw deductions table with compact styling
         const deductionsTable = autoTable(doc, {
@@ -406,7 +406,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
           },
           margin: { top: 0, right: 0, bottom: 0, left: 0 } // Remove default margins
         });
-        
+
         if (deductionsTable && deductionsTable.lastAutoTable) {
           currentY = deductionsTable.lastAutoTable.finalY;
         } else {
@@ -416,14 +416,14 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         console.error("Error rendering deductions table:", e);
         currentY += 15 + (deductionsTableData.length * 8);
       }
-      
+
       // Net Pay section with minimal spacing
       currentY += 15; // Increased from 10 to give more space before net pay section
-      
+
       // Net Pay with enhanced styling
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.roundedRect(leftMargin, currentY, contentWidth, 18, 2, 2, 'F'); // Reduced height from 20 to 18
-      
+
       // Net pay text 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11); // Reduced from 12
@@ -431,43 +431,43 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
       doc.text("NET PAY:", leftMargin + 10, currentY + 12, { align: "left" });
       doc.setFontSize(12); // Reduced from 14
       doc.text(formatCurrency(netPayable), rightMargin - 10, currentY + 12, { align: "right" });
-      
+
       // Update position after net pay with minimal spacing
       currentY += 24; // Reduced from 30
-      
+
       // Amount in words with minimal styling
       doc.setDrawColor(150, 150, 150);
       doc.setLineWidth(0.2);
       doc.roundedRect(leftMargin, currentY, contentWidth, 18, 2, 2, 'S'); // Reduced height from 20 to 18
-      
+
       doc.setFontSize(9); // Reduced from 10
       doc.setFont("helvetica", "bold");
       doc.setTextColor(80, 80, 80);
       doc.text("Amount in Words:", leftMargin + 5, currentY + 6); // Reduced positioning
       doc.setFont("helvetica", "italic");
       doc.setTextColor(0, 0, 0);
-      
+
       // Amount in words with compact text
       const words = numberToWords(netPayable);
       const wrappedText = doc.splitTextToSize(words, contentWidth - 80);
       doc.text(wrappedText, leftMargin + 60, currentY + 6); // Reduced positioning
-      
+
       // Footer with minimal spacing
       currentY += 24; // Reduced spacing before footer
-      
+
       // Footer with compact styling
       const footerY = pageHeight - 10; // Keep footer at bottom but not too close to edge
-      
+
       doc.setDrawColor(100, 100, 100);
       doc.setLineWidth(0.3);
       doc.line(leftMargin, footerY - 8, rightMargin, footerY - 8);
-      
+
       doc.setFontSize(7); // Reduced from 8
       doc.setFont("helvetica", "normal");
       doc.setTextColor(80, 80, 80);
-      doc.text("This is a computer-generated document and does not require a signature.", pageWidth/2, footerY, { align: "center" });
+      doc.text("This is a computer-generated document and does not require a signature.", pageWidth / 2, footerY, { align: "center" });
       doc.text(`Generated on: ${new Date().toLocaleDateString()}`, rightMargin - 5, footerY - 10, { align: "right" });
-      
+
       return doc;
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -494,14 +494,14 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
       // Open PDF in new tab with proper scaling
       const blob = doc.output('blob');
       const blobUrl = URL.createObjectURL(blob);
-      
+
       // Create a new window with proper viewport settings
       const newWindow = window.open();
       if (!newWindow) {
         alert("Please allow pop-ups to view the PDF");
         return;
       }
-      
+
       // Add responsive viewer HTML to the new window
       newWindow.document.write(`
         <!DOCTYPE html>
@@ -551,12 +551,12 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         </body>
         </html>
       `);
-      
+
       // Handle cleanup when the window is closed
       newWindow.addEventListener('beforeunload', () => {
         URL.revokeObjectURL(blobUrl);
       });
-      
+
     } catch (error) {
       alert(`Error viewing payslip: ${error.message}`);
     }
@@ -568,14 +568,14 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
       const doc = generatePDF();
       const blob = doc.output('blob');
       const blobUrl = URL.createObjectURL(blob);
-      
+
       // Create a new print window with proper print-specific CSS
       const printWindow = window.open();
       if (!printWindow) {
         alert("Please allow pop-ups to print the PDF");
         return;
       }
-      
+
       // Add responsive print-optimized HTML to the new window
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -650,7 +650,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         </body>
         </html>
       `);
-      
+
       // Handle cleanup when window is closed
       printWindow.addEventListener('beforeunload', () => {
         URL.revokeObjectURL(blobUrl);
@@ -665,16 +665,16 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
     if (!companyInfo.companyName || !employeeInfo.employeeName) {
       return false;
     }
-    
+
     // Ensure at least one earning with amount is entered
     const hasEarnings = earnings.some(item => item.name && parseFloat(item.amount));
-    
+
     return hasEarnings;
   };
 
   return (
     <div className="card">
-      <div className="flex items-center mb-4">
+      <div className="flex items-center gap-5 mb-4">
         <span className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
           <svg className="h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -683,7 +683,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         <h2 className="text-xl font-semibold text-gray-800">Generated Payslip</h2>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 sm:p-6 mb-5">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 sm:p-6 mb-6">
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <h3 className="text-gray-500 text-sm font-medium">Employee</h3>
@@ -698,7 +698,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         <div className="grid grid-cols-2 gap-8">
           <div>
             <h3 className="text-gray-500 text-sm font-medium mb-3">Earnings</h3>
-            <div className="space-y-2">
+            <div className="space-y-2 mb-2">
               {earnings.map((item, index) => (
                 item.name && item.amount ? (
                   <div key={index} className="flex justify-between">
@@ -742,19 +742,19 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 flex flex-col justify-center item-center gap-4 ">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <button
             onClick={handleGeneratePayslip}
             disabled={!isFormComplete()}
-            className="btn btn-primary" 
+            className="btn btn-primary"
           >
             <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             <span>Download PDF</span>
           </button>
-          
+
           <button
             onClick={handleViewPDF}
             disabled={!isFormComplete()}
@@ -767,7 +767,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
             <span>Preview PDF</span>
           </button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
           <button
             onClick={handlePrintPayslip}
@@ -780,7 +780,7 @@ const PaySlipResult = ({ earnings, deductions, companyInfo, employeeInfo, handle
             <span>Print Payslip</span>
           </button>
         </div>
-        
+
         <button
           onClick={handleReset}
           className="btn btn-secondary w-full"
